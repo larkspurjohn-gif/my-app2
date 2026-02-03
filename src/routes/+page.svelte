@@ -1,8 +1,8 @@
 <script>
     import Button from './Button.svelte' ;
     import {onMount} from 'svelte';
-    import { apiData, dogNames } from './store.js';
     
+    ///task 1
     function handleSave() {
         console.log('Saved!');
     }
@@ -15,19 +15,29 @@
         console.log('Submitted!');
     }
 
+    ///task 2
     let items = ['Go-Go Squeeze', 'Tissue', 'Granola Bars', 'Pads', 'Ginger Ale'];
 
+    ///task 3
+    let loading = true;
+    let error = null;
+    let facts = [];
     onMount(async () => {
-    fetch("https://dog.ceo/api/breeds/list/all")
-    .then(response => response.json())
-    .then(data => {
-            console.log(data);
-        apiData.set(data);
-    }).catch(error => {
-        console.log(error);
-        return [];
-    });
-    });
+  try {
+    const response = await fetch("https://catfact.ninja/facts");
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    facts = data.data;
+    console.log(facts);
+  } catch (err) {
+    error = err.message;
+  } finally {
+    loading = false;
+  }
+});
 
 </script>
 
@@ -61,16 +71,25 @@
     </ul>
 </div>
 
-<div class= "dogs">
-    <h1>Types of Dog</h1>
-	<ul>
-	{#each $dogNames as dogName}
-		<li>{dogName}</li>
-	{/each}
-	</ul>
+<div class= "cat-facts">
+    {#if loading}
+        <p class="text-gray-500">Loading cat facts…</p>
+    {/if}
+     {#if error}
+        <p class="text-red-500">Troubling loading cat facts, Error: {error}</p>
+    {/if}
+    {#if !loading && !error}
+        <h1>Cat Facts</h1>
+        <ul class="list-disc pl-6 space-y-2">
+            {#each facts as item}
+                <li>{item.fact}</li>
+            {/each}
+        </ul>
+    {/if}
+
+
 </div>
 
-<h1>Welcome to SvelteKit</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+
 
 
